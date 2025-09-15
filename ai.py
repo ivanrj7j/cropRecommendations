@@ -44,14 +44,15 @@ Instructions:
 2.  **Local Pricing**: When estimating costs for seeds, tools, and fertilizers, use the most recent and realistic local prices specifically for Jharkhand, India. If the region is Jharkhand or not specified, always use Jharkhand's local market prices for seeds, tools, and fertilizers. Clearly state if any price is an estimate based on Jharkhand's market.
 3.  **Generate recommendations**: Provide a list of four (4) of the most viable crop recommendations for the specified region.
 4.  **For each crop recommendation, provide the following details**:
-        a.  **Crop Name**: The name of the recommended crop.
-        b.  **Best Seeds**: A list of at least two specific, high-yield seed varieties or types suitable for the region.
-        c.  **Required Tools**: A list of essential tools and equipment needed for planting, maintenance, and harvesting of the crop.
-        d.  **Cost Estimate**: Provide a detailed cost breakdown for a one-year cultivation period for the specified land area (in acres). The cost breakdown should include:
-                -   Total estimated cost.
-                -   Itemized costs for seeds, water, fertilizer, tools/equipment, and labor.
-                -   All costs should be in the local currency of the region, based on the provided water price.
-                -   For seeds, tools, and fertilizers, use local prices from Jharkhand, India.
+    a.  **Crop Name**: The name of the recommended crop.
+    b.  **Best Seeds**: A list of at least two specific, high-yield seed varieties or types suitable for the region.
+    c.  **Required Tools**: A list of essential tools and equipment needed for planting, maintenance, and harvesting of the crop.
+    d.  **Cost Estimate**: Provide a detailed cost breakdown for a one-year cultivation period for the specified land area (in acres). The cost breakdown should include:
+        -   Total estimated cost.
+        -   Itemized costs for seeds, water, fertilizer, tools/equipment, and labor.
+        -   All costs should be in the local currency of the region, based on the provided water price.
+        -   For seeds, tools, and fertilizers, use local prices from Jharkhand, India.
+    e.  **Reasoning**: Provide a concise, clear explanation (a single sentence or short paragraph) of why this crop is a good choice for the given region, considering the land area, water price, and climate.
 5.  **Formatting**: Format your response as a JSON object, adhering strictly to the schema provided below. Do not include any explanatory text or conversational filler outside of the JSON block.
 
 Output Schema:
@@ -75,7 +76,8 @@ Output Schema:
             }},
             "required_tools": [
                 "string"
-            ]
+            ],
+            "reasoning": "string"
         }}
     ]
 }}

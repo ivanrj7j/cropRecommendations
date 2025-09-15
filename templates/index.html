@@ -102,8 +102,8 @@
     <div class="container">
         <h1>Crop Recommendation</h1>
         <form id="recommendForm">
-            <label for="land_area_sqm">Land Area (sqm)</label>
-            <input type="number" id="land_area_sqm" name="land_area_sqm" min="1" step="any" required>
+            <label for="land_area_acres">Land Area (acres)</label>
+            <input type="number" id="land_area_acres" name="land_area_acres" min="0.01" step="any" required>
 
             <label for="region">Region</label>
             <input type="text" id="region" name="region" required>
@@ -130,7 +130,7 @@
             submitBtn.disabled = true;
             const originalBtnText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
-            const land_area_sqm = parseFloat(form.land_area_sqm.value);
+            const land_area_acres = parseFloat(form.land_area_acres.value);
             const region = form.region.value;
             const water_price_per_liter = parseFloat(form.water_price_per_liter.value);
             const imageInput = form.image.files[0];
@@ -139,7 +139,7 @@
                 imageBase64 = await toBase64(imageInput);
             }
             const payload = {
-                land_area_sqm,
+                land_area_acres,
                 region,
                 water_price_per_liter,
                 image: imageBase64

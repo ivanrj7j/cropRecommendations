@@ -25,15 +25,15 @@ def recommend_crops():
     if not data:
         return jsonify({"error": "Invalid or missing JSON body."}), 400
     try:
-        land_area_sqm = data.get("land_area_sqm")
+        land_area_acres = data.get("land_area_acres")
         region = data.get("region")
         water_price_per_liter = data.get("water_price_per_liter")
         image = data.get("image")
-        if land_area_sqm is None or region is None or water_price_per_liter is None:
-            return jsonify({"error": "Missing required fields: land_area_sqm, region, water_price_per_liter."}), 400
+        if land_area_acres is None or region is None or water_price_per_liter is None:
+            return jsonify({"error": "Missing required fields: land_area_acres, region, water_price_per_liter."}), 400
         try:
             result = recommender.get_recommendation(
-                land_area_sqm=land_area_sqm,
+                land_area_acres=land_area_acres,
                 region=region,
                 water_price_per_liter=water_price_per_liter,
                 image=image

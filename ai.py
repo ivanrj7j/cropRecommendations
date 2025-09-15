@@ -9,112 +9,105 @@ class GeminiCropRecommender:
     def __init__(self, api_key: str, model_name: str = "gemini-2.0-flash-lite"):
         """
         Initializes the GeminiCropRecommender with an API key and model name.
-        
         Args:
             api_key: Your Google Gemini API key.
             model_name: The name of the Gemini model to use.
         """
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel(model_name)
-    
-    def get_recommendation(self, land_area_sqm: float, region: str, water_price_per_liter: float, image: str = None) -> dict:
+
+    def get_recommendation(self, land_area_acres: float, region: str, water_price_per_liter: float, image: str = None) -> dict:
         """
         Generates crop recommendations based on the provided data.
-        
         Args:
-            land_area_sqm: Land area in square meters.
+            land_area_acres: Land area in acres.
             region: Geographical region or location.
             water_price_per_liter: Price of water per liter in local currency.
             image: Base64 encoded image of the land (optional).
-            
         Returns:
             A dictionary containing the crop recommendations.
-            
         Raises:
             Exception: If the Gemini model returns an error or invalid JSON.
         """
-        
         # Build the prompt with user data
-        prompt_template = f"""
-            You are an AI agricultural consultant. Your task is to provide expert recommendations for crop cultivation based on specific user-provided data.
+        prompt_template = """
+You are an AI agricultural consultant. Your task is to provide expert recommendations for crop cultivation based on specific user-provided data.
 
-            User Data:
-            - Land area: {land_area_sqm} square meters
-            - Region: {region}
-            - Water price: {water_price_per_liter} per liter
-            - Land image (optional): [If an image is provided, analyze it for soil type, topography, and any visible plant life. Otherwise, state that no image was provided.]
+User Data:
+- Land area: {land_area_acres} acres
+- Region: {region}
+- Water price: {water_price_per_liter} per liter
+- Land image (optional): [If an image is provided, analyze it for soil type, topography, and any visible plant life. Otherwise, state that no image was provided.]
 
-            Instructions:
-            1.  **Analyze the data**: Based on the provided land area, region, and water price, conduct a comprehensive web search to identify the most suitable crops. Consider factors such as climate, soil conditions, and water requirements.
-            2.  **Generate recommendations**: Provide a list of four (4) of the most viable crop recommendations for the specified region.
-            3.  **For each crop recommendation, provide the following details**:
-                a.  **Crop Name**: The name of the recommended crop.
-                b.  **Best Seeds**: A list of at least two specific, high-yield seed varieties or types suitable for the region.
-                c.  **Required Tools**: A list of essential tools and equipment needed for planting, maintenance, and harvesting of the crop.
-                d.  **Cost Estimate**: Provide a detailed cost breakdown for a one-year cultivation period for the specified land area. The cost breakdown should include:
-                    -   Total estimated cost.
-                    -   Itemized costs for seeds, water, fertilizer, tools/equipment, and labor.
-                    -   All costs should be in the local currency of the region, based on the provided water price.
-            4.  **Formatting**: Format your response as a JSON object, adhering strictly to the schema provided below. Do not include any explanatory text or conversational filler outside of the JSON block.
+Instructions:
+1.  **Analyze the data**: Based on the provided land area (in acres), region, and water price, conduct a comprehensive web search to identify the most suitable crops. Consider factors such as climate, soil conditions, and water requirements.
+2.  **Generate recommendations**: Provide a list of four (4) of the most viable crop recommendations for the specified region.
+3.  **For each crop recommendation, provide the following details**:
+        a.  **Crop Name**: The name of the recommended crop.
+        b.  **Best Seeds**: A list of at least two specific, high-yield seed varieties or types suitable for the region.
+        c.  **Required Tools**: A list of essential tools and equipment needed for planting, maintenance, and harvesting of the crop.
+        d.  **Cost Estimate**: Provide a detailed cost breakdown for a one-year cultivation period for the specified land area (in acres). The cost breakdown should include:
+                -   Total estimated cost.
+                -   Itemized costs for seeds, water, fertilizer, tools/equipment, and labor.
+                -   All costs should be in the local currency of the region, based on the provided water price.
+4.  **Formatting**: Format your response as a JSON object, adhering strictly to the schema provided below. Do not include any explanatory text or conversational filler outside of the JSON block.
 
-            Output Schema:
-            ```json
-            {{
-              "crop_recommendations": [
-                {{
-                  "crop_name": "string",
-                  "best_seeds": [
-                    "string"
-                  ],
-                  "estimated_cost_per_year": {{
-                    "total_cost": "number",
-                    "breakdown": {{
-                      "seeds": "number",
-                      "water": "number",
-                      "fertilizer": "number",
-                      "tools_and_equipment": "number",
-                      "labor": "number"
-                    }}
-                  }},
-                  "required_tools": [
-                    "string"
-                  ]
+Output Schema:
+```json
+{{
+    "crop_recommendations": [
+        {{
+            "crop_name": "string",
+            "best_seeds": [
+                "string"
+            ],
+            "estimated_cost_per_year": {{
+                "total_cost": "number",
+                "breakdown": {{
+                    "seeds": "number",
+                    "water": "number",
+                    "fertilizer": "number",
+                    "tools_and_equipment": "number",
+                    "labor": "number"
                 }}
-              ]
-            }}
-            ```
-        """
-        
+            }},
+            "required_tools": [
+                "string"
+            ]
+        }}
+    ]
+}}
+```
+                """.format(
+                        land_area_acres=land_area_acres,
+                        region=region,
+                        water_price_per_liter=water_price_per_liter
+                )
+
+        # Handle multimodal input if an image is provided
+        if image:
+            contents = [
+                prompt_template,
+                {"text": "Land image provided, please analyze it."}
+            ]
+        else:
+            contents = [prompt_template]
+
         try:
-            # Handle multimodal input if an image is provided
-            if image:
-                contents = [
-                    prompt_template,
-                    {"text": "Land image provided, please analyze it."}
-                ]
-            else:
-                contents = [prompt_template]
+            response = self.model.generate_content(contents, stream=False)
+        except Exception as api_exc:
+            # Handle Gemini API errors
+            error_msg = f"Gemini API error: {getattr(api_exc, 'message', str(api_exc))}"
+            raise RuntimeError(error_msg)
 
-            try:
-                response = self.model.generate_content(contents, stream=False)
-            except Exception as api_exc:
-                # Handle Gemini API errors
-                error_msg = f"Gemini API error: {getattr(api_exc, 'message', str(api_exc))}"
-                raise RuntimeError(error_msg)
+        # Extract the JSON string from the response and parse it
+        response_text = response.text.strip().replace("```json", "").replace("```", "")
+        try:
+            recommendations = json.loads(response_text)
+        except Exception as json_exc:
+            raise ValueError(f"Failed to parse Gemini response as JSON: {json_exc}\nRaw response: {response.text}")
 
-            # Extract the JSON string from the response and parse it
-            response_text = response.text.strip().replace("```json", "").replace("```", "")
-            try:
-                recommendations = json.loads(response_text)
-            except Exception as json_exc:
-                raise ValueError(f"Failed to parse Gemini response as JSON: {json_exc}\nRaw response: {response.text}")
-
-            return recommendations
-
-        except Exception as e:
-            # Print for server logs, but raise for API to catch
-            print(f"An error occurred in GeminiCropRecommender: {e}")
-            raise
+        return recommendations
 
 # Example Usage:
 if __name__ == '__main__':

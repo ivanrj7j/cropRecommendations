@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Recommendation</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             background: #181a1b;
@@ -33,21 +34,43 @@
             margin-bottom: 8px;
             font-weight: 500;
         }
+        .region-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .region-group input {
+            flex-grow: 1;
+        }
         input, select, textarea {
             width: 100%;
             padding: 10px;
-            margin-bottom: 18px;
             border: none;
             border-radius: 6px;
             background: #2c2f33;
             color: #f1f1f1;
             font-size: 1rem;
         }
+        .track-location-btn {
+            background: #2c2f33;
+            color: #7ed957;
+            border: 1px solid #7ed957;
+            border-radius: 6px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            line-height: 1;
+        }
+        .track-location-btn:hover {
+            background: #7ed957;
+            color: #181a1b;
+        }
         input[type="file"] {
             padding: 6px 0;
             background: none;
         }
-        button {
+        button[type="submit"] {
             width: 100%;
             padding: 12px;
             background: #7ed957;
@@ -106,8 +129,11 @@
             <input type="number" id="land_area_acres" name="land_area_acres" min="0.01" step="any" required>
 
             <label for="region">Region</label>
-            <input type="text" id="region" name="region" required>
-
+            <div class="region-group">
+                <input type="text" id="region" name="region" required>
+                <button type="button" id="trackLocationBtn" class="track-location-btn" title="Track my location"><i class="fas fa-map-marker-alt"></i></button>
+            </div>
+            
             <label for="water_price_per_liter">Water Price (per liter)</label>
             <input type="number" id="water_price_per_liter" name="water_price_per_liter" min="0" step="any" required>
 
@@ -123,6 +149,53 @@
         const form = document.getElementById('recommendForm');
         const resultDiv = document.getElementById('result');
         const submitBtn = document.getElementById('submitBtn');
+        const regionInput = document.getElementById('region');
+        const trackLocationBtn = document.getElementById('trackLocationBtn');
+
+        // Track location functionality
+        trackLocationBtn.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                const originalBtnText = trackLocationBtn.innerHTML;
+                trackLocationBtn.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
+                trackLocationBtn.disabled = true;
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        try {
+                            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                            const data = await response.json();
+                            const address = data.address;
+                            let detectedRegion = '';
+                            if (address.city) detectedRegion += address.city;
+                            if (address.state_district) {
+                                if (detectedRegion) detectedRegion += ', ';
+                                detectedRegion += address.state_district;
+                            }
+                            if (address.state) {
+                                if (detectedRegion) detectedRegion += ', ';
+                                detectedRegion += address.state;
+                            }
+                            regionInput.value = detectedRegion || 'Unknown Region';
+                        } catch (error) {
+                            console.error('Error getting region:', error);
+                            alert('Failed to get region from coordinates.');
+                        } finally {
+                            trackLocationBtn.innerHTML = originalBtnText;
+                            trackLocationBtn.disabled = false;
+                        }
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        alert('Geolocation failed. Please enter your region manually.');
+                        trackLocationBtn.innerHTML = originalBtnText;
+                        trackLocationBtn.disabled = false;
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        });
+        
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             resultDiv.style.display = 'none';
@@ -178,10 +251,11 @@
             }
             let html = '';
             data.crop_recommendations.forEach((rec, idx) => {
-                html += `<div style=\"margin-bottom: 28px; border-bottom: 1px solid #333; padding-bottom: 18px;\">\n                    <h2 style='color:#7ed957; font-size:1.2rem; margin-bottom:8px;'>${idx+1}. ${rec.crop_name}</h2>\n                    <div><b>Best Seeds:</b> ${Array.isArray(rec.best_seeds) ? rec.best_seeds.map(seed => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${seed}</span>`).join('') : '-'}</div>\n                    <div><b>Required Tools:</b> ${Array.isArray(rec.required_tools) ? rec.required_tools.map(tool => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${tool}</span>`).join('') : '-'}</div>\n                    <div style='margin-top:8px;'><b>Estimated Cost (1 year):</b></div>\n                    <ul style='margin:0 0 0 18px; padding:0; list-style:disc;'>\n                        <li><b>Total:</b> ${formatRupee(rec.estimated_cost_per_year?.total_cost)} </li>\n                        <li><b>Seeds:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.seeds)} </li>\n                        <li><b>Water:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.water)} </li>\n                        <li><b>Fertilizer:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.fertilizer)} </li>\n                        <li><b>Tools/Equipment:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.tools_and_equipment)} </li>\n                        <li><b>Labor:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.labor)} </li>\n                    </ul>\n                </div>`;
+                html += `<div style=\"margin-bottom: 28px; border-bottom: 1px solid #333; padding-bottom: 18px;\">\n                    <h2 style='color:#7ed957; font-size:1.2rem; margin-bottom:8px;'>${idx+1}. ${rec.crop_name}</h2>\n                    <div><b>Best Seeds:</b> ${Array.isArray(rec.best_seeds) ? rec.best_seeds.map(seed => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${seed}</span>`).join('') : '-'}</div>\n                    <div><b>Required Tools:</b> ${Array.isArray(rec.required_tools) ? rec.required_tools.map(tool => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${tool}</span>`).join('') : '-'}</div>\n                    <div style='margin-top:8px;'><b>Estimated Cost (1 year):</b></div>\n                    <ul style='margin:0 0 0 18px; padding:0; list-style:disc;'>\n                        <li><b>Total:</b> ${formatRupee(rec.estimated_cost_per_year?.total_cost)} </li>\n                        <li><b>Seeds:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.seeds)} </li>\n                        <li><b>Water:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.water)} </li>\n                        <li><b>Fertilizer:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.fertilizer)} </li>\n                        <li><b>Tools/Equipment:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.tools_and_equipment)} </li>\n                        <li><b>Labor:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.labor)} </li>\n                    </ul>\n                </div>`;
             });
             return html;
         }
+
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();

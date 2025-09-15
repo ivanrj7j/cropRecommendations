@@ -58,9 +58,26 @@
             font-weight: 700;
             cursor: pointer;
             transition: background 0.2s;
+            position: relative;
         }
-        button:hover {
-            background: #6bc24a;
+        button[disabled] {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #fff;
+            border-top: 3px solid #7ed957;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         .result {
             background: #23272a;
@@ -97,7 +114,7 @@
             <label for="image">Land Image (optional)</label>
             <input type="file" id="image" name="image" accept="image/*">
 
-            <button type="submit">Get Recommendation</button>
+            <button type="submit" id="submitBtn">Get Recommendation</button>
         </form>
         <div class="result" id="result" style="display:none;"></div>
     </div>
@@ -105,10 +122,14 @@
     <script>
         const form = document.getElementById('recommendForm');
         const resultDiv = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             resultDiv.style.display = 'none';
             resultDiv.textContent = '';
+            submitBtn.disabled = true;
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
             const land_area_sqm = parseFloat(form.land_area_sqm.value);
             const region = form.region.value;
             const water_price_per_liter = parseFloat(form.water_price_per_liter.value);
@@ -131,7 +152,7 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.innerHTML = renderRecommendations(data);
                     resultDiv.style.color = '#f1f1f1';
                 } else {
                     resultDiv.textContent = data.error || 'An error occurred.';
@@ -141,8 +162,26 @@
             } catch (err) {
                 resultDiv.textContent = 'Failed to fetch recommendation.';
                 resultDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
+
+        function renderRecommendations(data) {
+            if (!data || !data.crop_recommendations || !Array.isArray(data.crop_recommendations)) {
+                return '<span>No recommendations found.</span>';
+            }
+            function formatRupee(val) {
+                if (val === undefined || val === null || val === '' || isNaN(val)) return '-';
+                return '₹' + Number(val).toLocaleString('en-IN');
+            }
+            let html = '';
+            data.crop_recommendations.forEach((rec, idx) => {
+                html += `<div style=\"margin-bottom: 28px; border-bottom: 1px solid #333; padding-bottom: 18px;\">\n                    <h2 style='color:#7ed957; font-size:1.2rem; margin-bottom:8px;'>${idx+1}. ${rec.crop_name}</h2>\n                    <div><b>Best Seeds:</b> ${Array.isArray(rec.best_seeds) ? rec.best_seeds.map(seed => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${seed}</span>`).join('') : '-'}</div>\n                    <div><b>Required Tools:</b> ${Array.isArray(rec.required_tools) ? rec.required_tools.map(tool => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${tool}</span>`).join('') : '-'}</div>\n                    <div style='margin-top:8px;'><b>Estimated Cost (1 year):</b></div>\n                    <ul style='margin:0 0 0 18px; padding:0; list-style:disc;'>\n                        <li><b>Total:</b> ${formatRupee(rec.estimated_cost_per_year?.total_cost)} </li>\n                        <li><b>Seeds:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.seeds)} </li>\n                        <li><b>Water:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.water)} </li>\n                        <li><b>Fertilizer:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.fertilizer)} </li>\n                        <li><b>Tools/Equipment:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.tools_and_equipment)} </li>\n                        <li><b>Labor:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.labor)} </li>\n                    </ul>\n                </div>`;
+            });
+            return html;
+        }
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();

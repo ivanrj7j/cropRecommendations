@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommendation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #181a1b;
+            color: #f1f1f1;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: #23272a;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            padding: 32px 28px 24px 28px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 28px;
+            font-weight: 700;
+            color: #7ed957;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 18px;
+            border: none;
+            border-radius: 6px;
+            background: #2c2f33;
+            color: #f1f1f1;
+            font-size: 1rem;
+        }
+        input[type="file"] {
+            padding: 6px 0;
+            background: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #7ed957;
+            color: #181a1b;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #6bc24a;
+        }
+        .result {
+            background: #23272a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-top: 24px;
+            padding: 18px;
+            color: #f1f1f1;
+            font-size: 0.98rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #888;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Recommendation</h1>
+        <form id="recommendForm">
+            <label for="land_area_sqm">Land Area (sqm)</label>
+            <input type="number" id="land_area_sqm" name="land_area_sqm" min="1" step="any" required>
+
+            <label for="region">Region</label>
+            <input type="text" id="region" name="region" required>
+
+            <label for="water_price_per_liter">Water Price (per liter)</label>
+            <input type="number" id="water_price_per_liter" name="water_price_per_liter" min="0" step="any" required>
+
+            <label for="image">Land Image (optional)</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <button type="submit">Get Recommendation</button>
+        </form>
+        <div class="result" id="result" style="display:none;"></div>
+    </div>
+    <div class="footer">&copy; 2025 Crop Recommendation AI</div>
+    <script>
+        const form = document.getElementById('recommendForm');
+        const resultDiv = document.getElementById('result');
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            resultDiv.style.display = 'none';
+            resultDiv.textContent = '';
+            const land_area_sqm = parseFloat(form.land_area_sqm.value);
+            const region = form.region.value;
+            const water_price_per_liter = parseFloat(form.water_price_per_liter.value);
+            const imageInput = form.image.files[0];
+            let imageBase64 = null;
+            if (imageInput) {
+                imageBase64 = await toBase64(imageInput);
+            }
+            const payload = {
+                land_area_sqm,
+                region,
+                water_price_per_liter,
+                image: imageBase64
+            };
+            try {
+                const res = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    resultDiv.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    resultDiv.textContent = data.error || 'An error occurred.';
+                }
+                resultDiv.style.display = 'block';
+            } catch (err) {
+                resultDiv.textContent = 'Failed to fetch recommendation.';
+                resultDiv.style.display = 'block';
+            }
+        });
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+    </script>
+</body>
+</html>

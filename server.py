@@ -31,13 +31,20 @@ def recommend_crops():
         image = data.get("image")
         if land_area_sqm is None or region is None or water_price_per_liter is None:
             return jsonify({"error": "Missing required fields: land_area_sqm, region, water_price_per_liter."}), 400
-        result = recommender.get_recommendation(
-            land_area_sqm=land_area_sqm,
-            region=region,
-            water_price_per_liter=water_price_per_liter,
-            image=image
-        )
-        return jsonify(result)
+        try:
+            result = recommender.get_recommendation(
+                land_area_sqm=land_area_sqm,
+                region=region,
+                water_price_per_liter=water_price_per_liter,
+                image=image
+            )
+            return jsonify(result)
+        except RuntimeError as gemini_error:
+            return jsonify({"error": str(gemini_error)}), 502
+        except ValueError as json_error:
+            return jsonify({"error": str(json_error)}), 500
+        except Exception as e:
+            return jsonify({"error": f"Unexpected error: {e}"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

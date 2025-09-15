@@ -132,8 +132,10 @@
                 const data = await res.json();
                 if (res.ok) {
                     resultDiv.textContent = JSON.stringify(data, null, 2);
+                    resultDiv.style.color = '#f1f1f1';
                 } else {
                     resultDiv.textContent = data.error || 'An error occurred.';
+                    resultDiv.style.color = '#ff6b6b';
                 }
                 resultDiv.style.display = 'block';
             } catch (err) {

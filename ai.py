@@ -88,30 +88,32 @@ class GeminiCropRecommender:
         try:
             # Handle multimodal input if an image is provided
             if image:
-                # Assuming the image is a base64 encoded string
-                # Note: The `google-genai` library can handle image parts directly.
-                # For a full implementation, you'd need to convert the base64 string
-                # into a suitable format, like a PIL.Image object.
-                # For this example, we'll just treat it as text.
-                # The actual implementation for image processing with Gemini API
-                # would involve converting the image to the correct part format.
                 contents = [
-                    prompt_template, 
-                    {"text": "Land image provided, please analyze it."} # Placeholder for actual image data handling
+                    prompt_template,
+                    {"text": "Land image provided, please analyze it."}
                 ]
             else:
                 contents = [prompt_template]
 
-            response = self.model.generate_content(contents, stream=False)
-            
+            try:
+                response = self.model.generate_content(contents, stream=False)
+            except Exception as api_exc:
+                # Handle Gemini API errors
+                error_msg = f"Gemini API error: {getattr(api_exc, 'message', str(api_exc))}"
+                raise RuntimeError(error_msg)
+
             # Extract the JSON string from the response and parse it
             response_text = response.text.strip().replace("```json", "").replace("```", "")
-            recommendations = json.loads(response_text)
-            
+            try:
+                recommendations = json.loads(response_text)
+            except Exception as json_exc:
+                raise ValueError(f"Failed to parse Gemini response as JSON: {json_exc}\nRaw response: {response.text}")
+
             return recommendations
-            
+
         except Exception as e:
-            print(f"An error occurred: {e}")
+            # Print for server logs, but raise for API to catch
+            print(f"An error occurred in GeminiCropRecommender: {e}")
             raise
 
 # Example Usage:

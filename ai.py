@@ -6,7 +6,7 @@ class GeminiCropRecommender:
     A class to interact with a Gemini model for generating crop recommendations.
     """
     
-    def __init__(self, api_key: str, model_name: str = "gemini-1.5-pro"):
+    def __init__(self, api_key: str, model_name: str = "gemini-2.0-flash-lite"):
         """
         Initializes the GeminiCropRecommender with an API key and model name.
         

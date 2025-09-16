@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crop Recommendation</title>
+    <title>annaDATA</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -16,7 +16,7 @@
             min-height: 100vh;
         }
         .container {
-            max-width: 480px;
+            max-width: 80%;
             margin: 60px auto;
             background: #23272a;
             border-radius: 12px;
@@ -123,7 +123,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Crop Recommendation</h1>
+        <h1>annaDATA</h1>
         <form id="recommendForm">
             <label for="land_area_acres">Land Area (acres)</label>
             <input type="number" id="land_area_acres" name="land_area_acres" min="0.01" step="any" required>
@@ -144,13 +144,33 @@
         </form>
         <div class="result" id="result" style="display:none;"></div>
     </div>
-    <div class="footer">&copy; 2025 Crop Recommendation AI</div>
+
+    <!-- Crop Price Section in its own container -->
+    <div class="container" style="margin-top:32px;">
+        <h2 style="color:#7ed957;">Current Crop Prices</h2>
+        <label for="cropSelect">Select Crop</label>
+        <select id="cropSelect" style="margin-bottom:12px;">
+            <option value="Paddy">Paddy</option>
+            <option value="Maize">Maize</option>
+            <option value="Moong">Moong</option>
+            <option value="Millet">Millet</option>
+        </select>
+        <button type="button" id="fetchPriceBtn" style="background:#7ed957; color:#181a1b; border:none; border-radius:6px; padding:8px 16px; font-weight:600; cursor:pointer;">Fetch Price</button>
+        <div class="result" id="priceResult" style="display:none; margin-top:18px;"></div>
+    </div>
+    <div class="footer">&copy; 2025 annaDATA AI</div>
     <script>
-        const form = document.getElementById('recommendForm');
-        const resultDiv = document.getElementById('result');
-        const submitBtn = document.getElementById('submitBtn');
-        const regionInput = document.getElementById('region');
-        const trackLocationBtn = document.getElementById('trackLocationBtn');
+    const form = document.getElementById('recommendForm');
+    const resultDiv = document.getElementById('result');
+    const submitBtn = document.getElementById('submitBtn');
+    const regionInput = document.getElementById('region');
+    const trackLocationBtn = document.getElementById('trackLocationBtn');
+    // Crop price section elements
+    const cropSelect = document.getElementById('cropSelect');
+    const fetchPriceBtn = document.getElementById('fetchPriceBtn');
+    const priceResult = document.getElementById('priceResult');
+    // Simple cache for crop prices
+    const cropPriceCache = {};
 
         // Track location functionality
         trackLocationBtn.addEventListener('click', () => {
@@ -240,6 +260,65 @@
                 submitBtn.innerHTML = originalBtnText;
             }
         });
+
+        // Crop price fetch logic
+        fetchPriceBtn.addEventListener('click', async function() {
+            const crop = cropSelect.value;
+            priceResult.style.display = 'none';
+            priceResult.textContent = '';
+            fetchPriceBtn.disabled = true;
+            const originalBtnText = fetchPriceBtn.innerHTML;
+            fetchPriceBtn.innerHTML = '<span class="spinner"></span>Fetching...';
+
+            // Check cache first
+            if (cropPriceCache[crop]) {
+                renderPriceResult(cropPriceCache[crop]);
+                fetchPriceBtn.disabled = false;
+                fetchPriceBtn.innerHTML = originalBtnText;
+                return;
+            }
+            try {
+                const res = await fetch('/getPrices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ crop })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    // API returns object with min, mod, max keys
+                    const priceObj = {
+                        min: data.min,
+                        modal: data.mod,
+                        max: data.max
+                    };
+                    cropPriceCache[crop] = priceObj;
+                    renderPriceResult(priceObj);
+                } else {
+                    priceResult.textContent = data.error || 'Failed to fetch price.';
+                    priceResult.style.color = '#ff6b6b';
+                    priceResult.style.display = 'block';
+                }
+            } catch (err) {
+                priceResult.textContent = 'Failed to fetch price.';
+                priceResult.style.color = '#ff6b6b';
+                priceResult.style.display = 'block';
+            } finally {
+                fetchPriceBtn.disabled = false;
+                fetchPriceBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        function renderPriceResult(priceObj) {
+            function formatRupee(val) {
+                if (val === undefined || val === null || val === '' || isNaN(val)) return '-';
+                return '₹' + Number(val).toLocaleString('en-IN');
+            }
+            priceResult.innerHTML = `<div><b>Minimum Price:</b> ${formatRupee(priceObj.min)}<br>
+            <b>Modal Price:</b> ${formatRupee(priceObj.modal)}<br>
+            <b>Maximum Price:</b> ${formatRupee(priceObj.max)}</div>`;
+            priceResult.style.color = '#f1f1f1';
+            priceResult.style.display = 'block';
+        }
 
         function renderRecommendations(data) {
             if (!data || !data.crop_recommendations || !Array.isArray(data.crop_recommendations)) {

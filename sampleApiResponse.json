@@ -1,0 +1,722 @@
+{
+  "created": 1627939168,
+  "updated": 1758034849,
+  "created_date": "2021-08-02T21:19:28Z",
+  "updated_date": "2025-09-16T15:00:49Z",
+  "active": "1",
+  "index_name": "9ef84268-d588-465a-a308-a864a43d0070",
+  "org": [
+    "Ministry of Agriculture and Farmers Welfare",
+    "Department of Agriculture and Farmers Welfare"
+  ],
+  "org_type": "Central",
+  "source": "data.gov.in",
+  "title": "Current Daily Price of Various Commodities from Various Markets (Mandi)",
+  "external_ws_url": "",
+  "visualizable": "1",
+  "field": [
+    {
+      "name": "State",
+      "id": "state",
+      "type": "keyword"
+    },
+    {
+      "name": "District",
+      "id": "district",
+      "type": "keyword"
+    },
+    {
+      "name": "Market",
+      "id": "market",
+      "type": "keyword"
+    },
+    {
+      "name": "Commodity",
+      "id": "commodity",
+      "type": "keyword"
+    },
+    {
+      "name": "Variety",
+      "id": "variety",
+      "type": "keyword"
+    },
+    {
+      "name": "Grade",
+      "id": "grade",
+      "type": "keyword"
+    },
+    {
+      "name": "Arrival_Date",
+      "id": "arrival_date",
+      "type": "date"
+    },
+    {
+      "name": "Min_x0020_Price",
+      "id": "min_price",
+      "type": "double"
+    },
+    {
+      "name": "Max_x0020_Price",
+      "id": "max_price",
+      "type": "double"
+    },
+    {
+      "name": "Modal_x0020_Price",
+      "id": "modal_price",
+      "type": "double"
+    }
+  ],
+  "external_ws": 0,
+  "catalog_uuid": "6141ea17-a69d-4713-b600-0a43c8fd9a6c",
+  "sector": [
+    "Agriculture",
+    "Agricultural Marketing"
+  ],
+  "target_bucket": {
+    "field": "9ef84268-d588-465a-a308-a864a43d0070",
+    "index": "daily_mandi_price",
+    "type": "6141ea17-a69d-4713-b600-0a43c8fd9a6c"
+  },
+  "desc": "Current Daily Price of Various Commodities from Various Markets (Mandi)",
+  "field_exposed": [
+    {
+      "name": "State",
+      "id": "state.keyword",
+      "type": "keyword"
+    },
+    {
+      "name": "District",
+      "id": "district",
+      "type": "keyword"
+    },
+    {
+      "name": "Market",
+      "id": "market",
+      "type": "keyword"
+    },
+    {
+      "name": "Commodity",
+      "id": "commodity",
+      "type": "keyword"
+    },
+    {
+      "name": "Variety",
+      "id": "variety",
+      "type": "keyword"
+    },
+    {
+      "name": "Grade",
+      "id": "grade",
+      "type": "keyword"
+    }
+  ],
+  "message": "Resource lists",
+  "version": "2.2.0",
+  "status": "ok",
+  "total": 222,
+  "count": 50,
+  "limit": "50",
+  "offset": "0",
+  "records": [
+    {
+      "state": "Chattisgarh",
+      "district": "Raigarh",
+      "market": "Baramkela",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "1001",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1700",
+      "max_price": "1700",
+      "modal_price": "1700"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Raigarh",
+      "market": "Salihabhata",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "1001",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1900",
+      "max_price": "1900",
+      "modal_price": "1900"
+    },
+    {
+      "state": "Gujarat",
+      "district": "Gandhinagar",
+      "market": "Dehgam",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1500",
+      "max_price": "2155",
+      "modal_price": "1827"
+    },
+    {
+      "state": "Haryana",
+      "district": "Panipat",
+      "market": "Bapauli",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2741",
+      "max_price": "2831",
+      "modal_price": "2800"
+    },
+    {
+      "state": "Haryana",
+      "district": "Panipat",
+      "market": "Panipat",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "1121",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2700",
+      "max_price": "3100",
+      "modal_price": "2900"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Mandla",
+      "market": "Nainpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Paddy",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2025",
+      "max_price": "2100",
+      "modal_price": "2100"
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Raigad",
+      "market": "Karjat(Raigad)",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2369",
+      "max_price": "2450",
+      "modal_price": "2400"
+    },
+    {
+      "state": "Manipur",
+      "district": "Bishnupur",
+      "market": "Bishenpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3375",
+      "max_price": "3375",
+      "modal_price": "3375"
+    },
+    {
+      "state": "Manipur",
+      "district": "Imphal West",
+      "market": "Imphal",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3375",
+      "max_price": "3375",
+      "modal_price": "3375"
+    },
+    {
+      "state": "Manipur",
+      "district": "Thoubal",
+      "market": "Thoubal",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3250",
+      "max_price": "3250",
+      "modal_price": "3250"
+    },
+    {
+      "state": "Punjab",
+      "district": "Amritsar",
+      "market": "Ajnala",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3100",
+      "max_price": "3300",
+      "modal_price": "3200"
+    },
+    {
+      "state": "Punjab",
+      "district": "Faridkot",
+      "market": "Sadiq",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "1121",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3000",
+      "max_price": "3111",
+      "modal_price": "3000"
+    },
+    {
+      "state": "Punjab",
+      "district": "Sangrur",
+      "market": "Dirba",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "1121",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3000",
+      "max_price": "3155",
+      "modal_price": "3150"
+    },
+    {
+      "state": "Telangana",
+      "district": "Khammam",
+      "market": "Kallur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Paddy",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2320",
+      "max_price": "2320",
+      "modal_price": "2320"
+    },
+    {
+      "state": "Telangana",
+      "district": "Medak",
+      "market": "Dubbak",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "I.R. 64",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2320",
+      "max_price": "2320",
+      "modal_price": "2320"
+    },
+    {
+      "state": "Telangana",
+      "district": "Nalgonda",
+      "market": "Kodad",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "B P T",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2300",
+      "max_price": "2300",
+      "modal_price": "2300"
+    },
+    {
+      "state": "Telangana",
+      "district": "Nalgonda",
+      "market": "Suryapeta",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "HMT",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1559",
+      "max_price": "2408",
+      "modal_price": "2266"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Aligarh",
+      "market": "Khair",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2600",
+      "max_price": "3100",
+      "modal_price": "2850"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Barabanki",
+      "market": "Safdarganj",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2100",
+      "max_price": "2200",
+      "modal_price": "2150"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Bulandshahar",
+      "market": "Buland Shahr",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2900",
+      "max_price": "3200",
+      "modal_price": "3100"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Hardoi",
+      "market": "Sandi",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2180",
+      "max_price": "2260",
+      "modal_price": "2230"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Mathura",
+      "market": "Kosikalan",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2900",
+      "max_price": "3040",
+      "modal_price": "3000"
+    },
+    {
+      "state": "Uttar Pradesh",
+      "district": "Raebarelli",
+      "market": "Bachranwa",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2265",
+      "max_price": "2300",
+      "modal_price": "2285"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Bankura",
+      "market": "Bankura Sadar",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2150",
+      "max_price": "2350",
+      "modal_price": "2300"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Bankura",
+      "market": "Indus(Bankura Sadar)",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2100",
+      "max_price": "2350",
+      "modal_price": "2300"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Birbhum",
+      "market": "Birbhum",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2300",
+      "max_price": "2320",
+      "modal_price": "2310"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Birbhum",
+      "market": "Bolpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2300",
+      "max_price": "2320",
+      "modal_price": "2310"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Malda",
+      "market": "Gajol",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2250",
+      "max_price": "2350",
+      "modal_price": "2300"
+    },
+    {
+      "state": "West Bengal",
+      "district": "Purba Bardhaman",
+      "market": "Katwa",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2310",
+      "max_price": "2330",
+      "modal_price": "2320"
+    },
+    {
+      "state": "Andhra Pradesh",
+      "district": "Nellore",
+      "market": "Rapur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2370",
+      "max_price": "2470",
+      "modal_price": "2440"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Balodabazar",
+      "market": "Kasdol",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "D.B.",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2000",
+      "max_price": "2000",
+      "modal_price": "2000"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Balrampur",
+      "market": "Kusmee",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "I.R. 36",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1800",
+      "max_price": "1800",
+      "modal_price": "1800"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Dantewada",
+      "market": "Gidam",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "1001",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1600",
+      "max_price": "1800",
+      "modal_price": "1700"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Raigarh",
+      "market": "Sarangarh",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "1001",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1600",
+      "max_price": "1600",
+      "modal_price": "1600"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Raipur",
+      "market": "Raipur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "MTU-1010",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1725",
+      "max_price": "1830",
+      "modal_price": "1800"
+    },
+    {
+      "state": "Chattisgarh",
+      "district": "Rajnandgaon",
+      "market": "Bandhabazar",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "I.R. 64",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1800",
+      "max_price": "1800",
+      "modal_price": "1800"
+    },
+    {
+      "state": "Gujarat",
+      "district": "Dahod",
+      "market": "Devgadhbaria",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1500",
+      "max_price": "1550",
+      "modal_price": "1535"
+    },
+    {
+      "state": "Gujarat",
+      "district": "Dahod",
+      "market": "Zalod(Zalod)",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Other",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1500",
+      "max_price": "1750",
+      "modal_price": "1625"
+    },
+    {
+      "state": "Haryana",
+      "district": "Kurukshetra",
+      "market": "Pipli",
+      "commodity": "Paddy(Dhan)(Basmati)",
+      "variety": "Basmati 1509",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2650",
+      "max_price": "3175",
+      "modal_price": "2965"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Anupur",
+      "market": "Anuppur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Paddy",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2100",
+      "max_price": "2100",
+      "modal_price": "2100"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Anupur",
+      "market": "Kotma",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Dhan",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2050",
+      "max_price": "2050",
+      "modal_price": "2050"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Balaghat",
+      "market": "Katangi",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1840",
+      "max_price": "1855",
+      "modal_price": "1855"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Hoshangabad",
+      "market": "Babai",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Basumathi",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "3150",
+      "max_price": "3150",
+      "modal_price": "3150"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Jabalpur",
+      "market": "Jabalpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Dhan",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1795",
+      "max_price": "1805",
+      "modal_price": "1805"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Katni",
+      "market": "Katni",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Dhan",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1100",
+      "max_price": "2351",
+      "modal_price": "2180"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Mandla",
+      "market": "Mandla",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2000",
+      "max_price": "2100",
+      "modal_price": "2010"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Mandla",
+      "market": "Nainpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Common",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2000",
+      "max_price": "2125",
+      "modal_price": "2125"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Mandla",
+      "market": "Nainpur",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Dhan",
+      "grade": "Non-FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "1810",
+      "max_price": "1810",
+      "modal_price": "1810"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Raisen",
+      "market": "Udaipura",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Paddy",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2400",
+      "max_price": "3100",
+      "modal_price": "3100"
+    },
+    {
+      "state": "Madhya Pradesh",
+      "district": "Shivpuri",
+      "market": "Magroni",
+      "commodity": "Paddy(Dhan)(Common)",
+      "variety": "Paddy",
+      "grade": "FAQ",
+      "arrival_date": "16/09/2025",
+      "min_price": "2568",
+      "max_price": "2604",
+      "modal_price": "2604"
+    }
+  ]
+}

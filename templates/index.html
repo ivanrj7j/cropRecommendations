@@ -9,8 +9,15 @@
         <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+
     <div class="container">
         <h1>annaDATA</h1>
+        <!-- Weather Section -->
+        <div id="weatherSection" style="margin-bottom:32px;">
+            <h2 style="color:#7ed957;">Current Weather</h2>
+            <div id="weatherInfo" style="margin-bottom:18px;"></div>
+            <canvas id="weatherChart" style="background:#23272a; border-radius:8px; width:100%; max-width:700px; height:300px;"></canvas>
+        </div>
         <form id="recommendForm">
             <label for="land_area_acres">Land Area (acres)</label>
             <input type="number" id="land_area_acres" name="land_area_acres" min="0.01" step="any" required>

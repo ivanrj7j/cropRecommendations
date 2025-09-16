@@ -1,5 +1,6 @@
 import os
 from flask import Flask, request, jsonify, render_template
+from weather import WeatherData
 from dotenv import load_dotenv
 from ai import GeminiCropRecommender
 import requests
@@ -78,6 +79,26 @@ def getPrices():
         maxPrice += int(record["max_price"])
 
     return jsonify({"min":minPrice/totalRecords, "mod":modPrice/totalRecords, "max":maxPrice/totalRecords})
+
+
+# Weather endpoint
+@app.route('/weather', methods=['POST'])
+def get_weather():
+    data = request.get_json()
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+    if latitude is None or longitude is None:
+        return jsonify({'error': 'Missing latitude or longitude'}), 400
+    try:
+        weather = WeatherData(latitude=float(latitude), longitude=float(longitude))
+        hourly_df = weather.fetch_hourly_data(forecast_days=1)
+        if hourly_df is None:
+            return jsonify({'error': 'Failed to fetch weather data'}), 500
+        # Convert DataFrame to dict for JSON response
+        weather_json = hourly_df.to_dict(orient='list')
+        return jsonify(weather_json)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

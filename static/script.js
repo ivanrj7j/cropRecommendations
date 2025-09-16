@@ -10,39 +10,31 @@ const priceResult = document.getElementById('priceResult');
 // Simple cache for crop prices
 const cropPriceCache = {};
 
+// Store user's last accessed location
+let userLatitude = null;
+let userLongitude = null;
+let userPlaceInfo = { placeName: '', district: '', state: '' };
+
 // Track location functionality
+
 trackLocationBtn.addEventListener('click', () => {
     if (navigator.geolocation) {
         const originalBtnText = trackLocationBtn.innerHTML;
         trackLocationBtn.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
         trackLocationBtn.disabled = true;
         navigator.geolocation.getCurrentPosition(
-            async (position) => {
+            function(position) {
                 const { latitude, longitude } = position.coords;
-                try {
-                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-                    const data = await response.json();
-                    const address = data.address;
-                    let detectedRegion = '';
-                    if (address.city) detectedRegion += address.city;
-                    if (address.state_district) {
-                        if (detectedRegion) detectedRegion += ', ';
-                        detectedRegion += address.state_district;
-                    }
-                    if (address.state) {
-                        if (detectedRegion) detectedRegion += ', ';
-                        detectedRegion += address.state;
-                    }
-                    regionInput.value = detectedRegion || 'Unknown Region';
-                } catch (error) {
-                    console.error('Error getting region:', error);
-                    alert('Failed to get region from coordinates.');
-                } finally {
+                userLatitude = latitude;
+                userLongitude = longitude;
+                fetchPlaceInfo(latitude, longitude).then(placeInfo => {
+                    userPlaceInfo = placeInfo;
+                    regionInput.value = composeRegionString(placeInfo) || 'Unknown Region';
                     trackLocationBtn.innerHTML = originalBtnText;
                     trackLocationBtn.disabled = false;
-                }
+                });
             },
-            (error) => {
+            function(error) {
                 console.error('Geolocation error:', error);
                 alert('Geolocation failed. Please enter your region manually.');
                 trackLocationBtn.innerHTML = originalBtnText;
@@ -53,6 +45,29 @@ trackLocationBtn.addEventListener('click', () => {
         alert('Geolocation is not supported by your browser.');
     }
 });
+
+async function fetchPlaceInfo(latitude, longitude) {
+    try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = await response.json();
+        const address = data.address || {};
+        let placeName = address.city || address.town || address.village || address.hamlet || '';
+        let district = address.state_district || address.county || '';
+        let state = address.state || '';
+        return { placeName, district, state };
+    } catch (error) {
+        console.error('Error getting place info:', error);
+        return { placeName: '', district: '', state: '' };
+    }
+}
+
+function composeRegionString(placeInfo) {
+    let parts = [];
+    if (placeInfo.placeName) parts.push(placeInfo.placeName);
+    if (placeInfo.district) parts.push(placeInfo.district);
+    if (placeInfo.state) parts.push(placeInfo.state);
+    return parts.join(', ');
+}
 
 form.addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -99,53 +114,6 @@ form.addEventListener('submit', async function(e) {
     }
 });
 
-// Crop price fetch logic
-fetchPriceBtn.addEventListener('click', async function() {
-    const crop = cropSelect.value;
-    priceResult.style.display = 'none';
-    priceResult.textContent = '';
-    fetchPriceBtn.disabled = true;
-    const originalBtnText = fetchPriceBtn.innerHTML;
-    fetchPriceBtn.innerHTML = '<span class="spinner"></span>Fetching...';
-
-    // Check cache first
-    if (cropPriceCache[crop]) {
-        renderPriceResult(cropPriceCache[crop]);
-        fetchPriceBtn.disabled = false;
-        fetchPriceBtn.innerHTML = originalBtnText;
-        return;
-    }
-    try {
-        const res = await fetch('/getPrices', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ crop })
-        });
-        const data = await res.json();
-        if (res.ok) {
-            // API returns object with min, mod, max keys
-            const priceObj = {
-                min: data.min,
-                modal: data.mod,
-                max: data.max
-            };
-            cropPriceCache[crop] = priceObj;
-            renderPriceResult(priceObj);
-        } else {
-            priceResult.textContent = data.error || 'Failed to fetch price.';
-            priceResult.style.color = '#ff6b6b';
-            priceResult.style.display = 'block';
-        }
-    } catch (err) {
-        priceResult.textContent = 'Failed to fetch price.';
-        priceResult.style.color = '#ff6b6b';
-        priceResult.style.display = 'block';
-    } finally {
-        fetchPriceBtn.disabled = false;
-        fetchPriceBtn.innerHTML = originalBtnText;
-    }
-});
-
 function renderPriceResult(priceObj) {
     function formatRupee(val) {
         if (val === undefined || val === null || val === '' || isNaN(val)) return '-';
@@ -173,6 +141,7 @@ function renderRecommendations(data) {
     return html;
 }
 
+
 function toBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -180,4 +149,232 @@ function toBase64(file) {
         reader.onload = () => resolve(reader.result.split(',')[1]);
         reader.onerror = error => reject(error);
     });
+}
+
+
+// --- Weather Session ---
+window.addEventListener('DOMContentLoaded', () => {
+    showWeatherLoading();
+        // On page load, get location, then place info, then fetch weather
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    userLatitude = position.coords.latitude;
+                    userLongitude = position.coords.longitude;
+                    userPlaceInfo = await fetchPlaceInfo(userLatitude, userLongitude);
+                    // Now update weather section title with place info
+                    const weatherSection = document.getElementById('weatherSection');
+                    if (weatherSection) {
+                        let placeStr = composeRegionString(userPlaceInfo);
+                        weatherSection.querySelector('h2').innerHTML = `Current Weather${placeStr ? ' in ' + placeStr : ''}`;
+                    }
+                    fetchWeatherAndDisplay();
+                },
+                (error) => {
+                    showWeatherError('Geolocation failed. Cannot fetch weather.');
+                }
+            );
+        } else {
+            showWeatherError('Geolocation is not supported by your browser.');
+        }
+});
+
+function showWeatherLoading() {
+    const weatherSection = document.getElementById('weatherSection');
+    const weatherInfo = document.getElementById('weatherInfo');
+    if (weatherSection) {
+        let placeStr = composeRegionString(userPlaceInfo);
+        weatherSection.querySelector('h2').innerHTML = `Current Weather${placeStr ? ' in ' + placeStr : ''}`;
+    }
+    if (weatherInfo) {
+        weatherInfo.innerHTML = '<span class="spinner"></span> Loading weather data...';
+    }
+    const weatherChart = document.getElementById('weatherChart');
+    if (weatherChart) {
+        weatherChart.style.display = 'none';
+    }
+}
+
+function fetchWeatherAndDisplay() {
+    // If location is not yet set, fetch it first
+    if (userLatitude === null || userLongitude === null) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userLatitude = position.coords.latitude;
+                    userLongitude = position.coords.longitude;
+                    fetchWeatherAndDisplay(); // Retry after getting location
+                },
+                (error) => {
+                    showWeatherError('Geolocation failed. Cannot fetch weather.');
+                }
+            );
+        } else {
+            showWeatherError('Geolocation is not supported by your browser.');
+            return;
+        }
+    } else {
+        fetch('/weather', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ latitude: userLatitude, longitude: userLongitude })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                showWeatherError(data.error);
+                return;
+            }
+            displayWeatherData(data);
+        })
+        .catch(err => {
+            showWeatherError('Weather fetch error: ' + err);
+        });
+    }
+}
+
+function showWeatherError(msg) {
+    const weatherInfo = document.getElementById('weatherInfo');
+    if (weatherInfo) {
+        weatherInfo.innerHTML = `<span style="color:#ff6b6b;">${msg}</span>`;
+    }
+    const weatherChart = document.getElementById('weatherChart');
+    if (weatherChart) {
+        weatherChart.style.display = 'none';
+    }
+}
+
+function displayWeatherData(data) {
+    // Show summary for current hour
+    const weatherSection = document.getElementById('weatherSection');
+    if (weatherSection) {
+        let placeStr = composeRegionString(userPlaceInfo);
+        weatherSection.querySelector('h2').innerHTML = `Current Weather${placeStr ? ' in ' + placeStr : ''}`;
+    }
+    const weatherInfo = document.getElementById('weatherInfo');
+    if (!weatherInfo || !data || !data.date || !data.temperature_2m) return;
+    // Find current hour index (closest to now)
+    const now = new Date();
+    let idx = 0;
+    function parseISTDate(str) {
+        // Remove ' IST' and parse as local time
+        return new Date(str.replace(' IST', ''));
+    }
+    for (let i = 0; i < data.date.length; i++) {
+        const d = parseISTDate(data.date[i]);
+        if (d > now) break;
+        idx = i;
+    }
+    // Compose weather summary
+    const temp = data.temperature_2m[idx];
+    const rain = data.rain[idx];
+    const wind = data.wind_speed_10m[idx];
+    const soil = data.soil_moisture_0_to_1cm[idx];
+    const locationStr = composeRegionString(userPlaceInfo);
+    weatherInfo.innerHTML = `
+        <b>Location:</b> ${locationStr || 'Failed to get place name'}<br>
+        <b>Time:</b> ${parseISTDate(data.date[idx]).toLocaleString()} IST<br>
+        <b>Temperature:</b> ${temp.toFixed(1)}°C<br>
+        <b>Rain:</b> ${rain} mm<br>
+        <b>Wind:</b> ${wind} m/s<br>
+        <b>Soil Moisture:</b> ${soil.toFixed(3)} m³/m³
+    `;
+
+    // Show chart
+    renderWeatherChart(data);
+}
+
+function renderWeatherChart(data) {
+    const ctx = document.getElementById('weatherChart').getContext('2d');
+    document.getElementById('weatherChart').style.display = 'block';
+    // Destroy previous chart if exists
+    if (window.weatherChartInstance) {
+        window.weatherChartInstance.destroy();
+    }
+    // Prepare chart data
+    function parseISTDate(str) {
+        return new Date(str.replace(' IST', ''));
+    }
+    const labels = data.date.map(d => {
+        const dt = parseISTDate(d);
+        return dt.getHours() + ':00';
+    });
+    window.weatherChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: data.temperature_2m,
+                    borderColor: '#7ed957',
+                    backgroundColor: 'rgba(126,217,87,0.1)',
+                    yAxisID: 'y',
+                    tension: 0.3,
+                },
+                {
+                    label: 'Rain (mm)',
+                    data: data.rain,
+                    borderColor: '#57a7ed',
+                    backgroundColor: 'rgba(87,167,237,0.1)',
+                    yAxisID: 'y1',
+                    tension: 0.3,
+                },
+                {
+                    label: 'Soil Moisture',
+                    data: data.soil_moisture_0_to_1cm,
+                    borderColor: '#edc957',
+                    backgroundColor: 'rgba(237,201,87,0.1)',
+                    yAxisID: 'y2',
+                    tension: 0.3,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            stacked: false,
+            plugins: {
+                legend: { labels: { color: '#f1f1f1' } },
+                title: { display: false }
+            },
+            scales: {
+                x: { ticks: { color: '#f1f1f1' }, grid: { color: '#333' } },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'Temperature (°C)', color: '#7ed957' },
+                    ticks: { color: '#7ed957' },
+                    grid: { color: '#333' }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'Rain (mm)', color: '#57a7ed' },
+                    ticks: { color: '#57a7ed' },
+                    grid: { drawOnChartArea: false }
+                },
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'Soil Moisture', color: '#edc957' },
+                    ticks: { color: '#edc957' },
+                    grid: { drawOnChartArea: false }
+                }
+            }
+        }
+    });
+}
+
+// Load Chart.js dynamically if not present
+if (typeof Chart === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    script.onload = () => {
+        // Chart.js loaded, re-render if needed
+    };
+    document.head.appendChild(script);
 }

@@ -1,0 +1,183 @@
+const form = document.getElementById('recommendForm');
+const resultDiv = document.getElementById('result');
+const submitBtn = document.getElementById('submitBtn');
+const regionInput = document.getElementById('region');
+const trackLocationBtn = document.getElementById('trackLocationBtn');
+// Crop price section elements
+const cropSelect = document.getElementById('cropSelect');
+const fetchPriceBtn = document.getElementById('fetchPriceBtn');
+const priceResult = document.getElementById('priceResult');
+// Simple cache for crop prices
+const cropPriceCache = {};
+
+// Track location functionality
+trackLocationBtn.addEventListener('click', () => {
+    if (navigator.geolocation) {
+        const originalBtnText = trackLocationBtn.innerHTML;
+        trackLocationBtn.innerHTML = '<span class="fas fa-spinner fa-spin"></span>';
+        trackLocationBtn.disabled = true;
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                    const data = await response.json();
+                    const address = data.address;
+                    let detectedRegion = '';
+                    if (address.city) detectedRegion += address.city;
+                    if (address.state_district) {
+                        if (detectedRegion) detectedRegion += ', ';
+                        detectedRegion += address.state_district;
+                    }
+                    if (address.state) {
+                        if (detectedRegion) detectedRegion += ', ';
+                        detectedRegion += address.state;
+                    }
+                    regionInput.value = detectedRegion || 'Unknown Region';
+                } catch (error) {
+                    console.error('Error getting region:', error);
+                    alert('Failed to get region from coordinates.');
+                } finally {
+                    trackLocationBtn.innerHTML = originalBtnText;
+                    trackLocationBtn.disabled = false;
+                }
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                alert('Geolocation failed. Please enter your region manually.');
+                trackLocationBtn.innerHTML = originalBtnText;
+                trackLocationBtn.disabled = false;
+            }
+        );
+    } else {
+        alert('Geolocation is not supported by your browser.');
+    }
+});
+
+form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    resultDiv.style.display = 'none';
+    resultDiv.textContent = '';
+    submitBtn.disabled = true;
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<span class="spinner"></span>Processing...';
+    const land_area_acres = parseFloat(form.land_area_acres.value);
+    const region = form.region.value;
+    const water_price_per_liter = parseFloat(form.water_price_per_liter.value);
+    const imageInput = form.image.files[0];
+    let imageBase64 = null;
+    if (imageInput) {
+        imageBase64 = await toBase64(imageInput);
+    }
+    const payload = {
+        land_area_acres,
+        region,
+        water_price_per_liter,
+        image: imageBase64
+    };
+    try {
+        const res = await fetch('/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+            resultDiv.innerHTML = renderRecommendations(data);
+            resultDiv.style.color = '#f1f1f1';
+        } else {
+            resultDiv.textContent = data.error || 'An error occurred.';
+            resultDiv.style.color = '#ff6b6b';
+        }
+        resultDiv.style.display = 'block';
+    } catch (err) {
+        resultDiv.textContent = 'Failed to fetch recommendation.';
+        resultDiv.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
+    }
+});
+
+// Crop price fetch logic
+fetchPriceBtn.addEventListener('click', async function() {
+    const crop = cropSelect.value;
+    priceResult.style.display = 'none';
+    priceResult.textContent = '';
+    fetchPriceBtn.disabled = true;
+    const originalBtnText = fetchPriceBtn.innerHTML;
+    fetchPriceBtn.innerHTML = '<span class="spinner"></span>Fetching...';
+
+    // Check cache first
+    if (cropPriceCache[crop]) {
+        renderPriceResult(cropPriceCache[crop]);
+        fetchPriceBtn.disabled = false;
+        fetchPriceBtn.innerHTML = originalBtnText;
+        return;
+    }
+    try {
+        const res = await fetch('/getPrices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ crop })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            // API returns object with min, mod, max keys
+            const priceObj = {
+                min: data.min,
+                modal: data.mod,
+                max: data.max
+            };
+            cropPriceCache[crop] = priceObj;
+            renderPriceResult(priceObj);
+        } else {
+            priceResult.textContent = data.error || 'Failed to fetch price.';
+            priceResult.style.color = '#ff6b6b';
+            priceResult.style.display = 'block';
+        }
+    } catch (err) {
+        priceResult.textContent = 'Failed to fetch price.';
+        priceResult.style.color = '#ff6b6b';
+        priceResult.style.display = 'block';
+    } finally {
+        fetchPriceBtn.disabled = false;
+        fetchPriceBtn.innerHTML = originalBtnText;
+    }
+});
+
+function renderPriceResult(priceObj) {
+    function formatRupee(val) {
+        if (val === undefined || val === null || val === '' || isNaN(val)) return '-';
+        return '₹' + Number(val).toLocaleString('en-IN');
+    }
+    priceResult.innerHTML = `<div><b>Minimum Price:</b> ${formatRupee(priceObj.min)}<br>
+    <b>Modal Price:</b> ${formatRupee(priceObj.modal)}<br>
+    <b>Maximum Price:</b> ${formatRupee(priceObj.max)}</div>`;
+    priceResult.style.color = '#f1f1f1';
+    priceResult.style.display = 'block';
+}
+
+function renderRecommendations(data) {
+    if (!data || !data.crop_recommendations || !Array.isArray(data.crop_recommendations)) {
+        return '<span>No recommendations found.</span>';
+    }
+    function formatRupee(val) {
+        if (val === undefined || val === null || val === '' || isNaN(val)) return '-';
+        return '₹' + Number(val).toLocaleString('en-IN');
+    }
+    let html = '';
+    data.crop_recommendations.forEach((rec, idx) => {
+        html += `<div style=\"margin-bottom: 28px; border-bottom: 1px solid #333; padding-bottom: 18px;\">\n                    <h2 style='color:#7ed957; font-size:1.2rem; margin-bottom:8px;'>${idx+1}. ${rec.crop_name}</h2>\n                    <div><b>Reasoning:</b> ${rec.reasoning || '-'}</div>\n                    <div><b>Best Seeds:</b> ${Array.isArray(rec.best_seeds) ? rec.best_seeds.map(seed => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${seed}</span>`).join('') : '-'}</div>\n                    <div><b>Required Tools:</b> ${Array.isArray(rec.required_tools) ? rec.required_tools.map(tool => `<span style='background:#2c2f33; border-radius:4px; padding:2px 8px; margin-right:4px;'>${tool}</span>`).join('') : '-'}</div>\n                    <div style='margin-top:8px;'><b>Estimated Cost (1 year):</b></div>\n                    <ul style='margin:0 0 0 18px; padding:0; list-style:disc;'>\n                        <li><b>Total:</b> ${formatRupee(rec.estimated_cost_per_year?.total_cost)} </li>\n                        <li><b>Seeds:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.seeds)} </li>\n                        <li><b>Water:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.water)} </li>\n                        <li><b>Fertilizer:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.fertilizer)} </li>\n                        <li><b>Tools/Equipment:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.tools_and_equipment)} </li>\n                        <li><b>Labor:</b> ${formatRupee(rec.estimated_cost_per_year?.breakdown?.labor)} </li>\n                    </ul>\n                </div>`;
+    });
+    return html;
+}
+
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
+}

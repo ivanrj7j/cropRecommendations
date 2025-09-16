@@ -1,0 +1,112 @@
+body {
+    background: #181a1b;
+    color: #f1f1f1;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+.container {
+    max-width: 80%;
+    margin: 60px auto;
+    background: #23272a;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    padding: 32px 28px 24px 28px;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 28px;
+    font-weight: 700;
+    color: #7ed957;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+.region-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.region-group input {
+    flex-grow: 1;
+}
+input, select, textarea {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: #2c2f33;
+    color: #f1f1f1;
+    font-size: 1rem;
+}
+.track-location-btn {
+    background: #2c2f33;
+    color: #7ed957;
+    border: 1px solid #7ed957;
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    line-height: 1;
+}
+.track-location-btn:hover {
+    background: #7ed957;
+    color: #181a1b;
+}
+input[type="file"] {
+    padding: 6px 0;
+    background: none;
+}
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #7ed957;
+    color: #181a1b;
+    border: none;
+    border-radius: 6-px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+}
+button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid #fff;
+    border-top: 3px solid #7ed957;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.result {
+    background: #23272a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-top: 24px;
+    padding: 18px;
+    color: #f1f1f1;
+    font-size: 0.98rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+.footer {
+    text-align: center;
+    margin-top: 32px;
+    color: #888;
+    font-size: 0.95rem;
+}

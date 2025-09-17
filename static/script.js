@@ -9,6 +9,39 @@ const fetchPriceBtn = document.getElementById('fetchPriceBtn');
 const priceResult = document.getElementById('priceResult');
 // Simple cache for crop prices
 const cropPriceCache = {};
+// Crop price fetching
+fetchPriceBtn.addEventListener('click', async () => {
+    const crop = cropSelect.value;
+    priceResult.style.display = 'none';
+    priceResult.innerHTML = '<span class="spinner"></span> Fetching...';
+    fetchPriceBtn.disabled = true;
+    try {
+        // Use cache if available
+        if (cropPriceCache[crop]) {
+            renderPriceResult(cropPriceCache[crop]);
+        } else {
+            const res = await fetch('/getPrices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ crop })
+            });
+            const data = await res.json();
+            // The backend returns min, mod, max
+            if (res.ok && data && data.min !== undefined && data.mod !== undefined && data.max !== undefined) {
+                cropPriceCache[crop] = { min: data.min, modal: data.mod, max: data.max };
+                renderPriceResult(cropPriceCache[crop]);
+            } else {
+                priceResult.innerHTML = `<span style='color:#ff6b6b;'>${data.error || 'Failed to fetch price.'}</span>`;
+                priceResult.style.display = 'block';
+            }
+        }
+    } catch (err) {
+        priceResult.innerHTML = `<span style='color:#ff6b6b;'>Error fetching price.</span>`;
+        priceResult.style.display = 'block';
+    } finally {
+        fetchPriceBtn.disabled = false;
+    }
+});
 
 // Store user's last accessed location
 let userLatitude = null;
